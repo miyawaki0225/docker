@@ -38,6 +38,87 @@ https://www.tohoho-web.com/docker/about.html
 ## Docker-docs-ja
 https://docs.docker.jp/  
 
+## Dockerのチュートリアル
+- イメージを管理する
+- コンテナを管理する
+- コンテナに接続する
+- ホストのディレクトリをマウントする
+- ホストの8080ポートをコンテナの80にマッピングする
+
+```shell:イメージを管理する
+# DockerHub からイメージを検索する
+docker search centos
+
+# イメージをダウンロードする
+docker pull centos:7
+
+# ダウンロード済みのイメージ一覧を表示する
+docker images
+
+# イメージを削除する
+docker rmi centos:7
+```
+
+```shell:コンテナを管理する
+# コンテナを起動する
+docker run -d -it --name cont1 centos:7
+
+# コンテナの一覧を表示する (-a は停止中もすべて)
+docker ps -a
+
+# コンテナを開始・停止・再起動・削除・リネームする
+docker start cont1
+docker stop cont1
+docker restart cont1
+docker rm cont1
+docker rename cont1 cont2
+```
+
+コンテナ起動(run)時には下記などのオプションを指定することができます。  
+
+
+|オプション	|説明|
+|---|---|
+|-d	|コンテナのメインプロセスを端末からデタッチします。|
+|-i	|コンテナの標準入力を開いたままにします。|
+|-t	|端末を割り当てたままにします。|
+|--name 名前	|コンテナ名を指定します。|
+|-p hPort:cPort	|ホストOSのポート番号(hPort)を、コンテナ内のポート番号(cPort)にバインドします。(例: -p 8080:80)|
+|-v hVolume:cVolume	|ホストのボリューム(hVolume)を、コンテナ内のボリューム(cVolume)にバインドします。(例: -v /var/cont1/app:/opt/app)|
+|--rm	|コンテナのメインプロセス終了時にコンテナを自動的に削除します。|
+  
+
+- centos イメージなど、起動時に -it オプションをつけ、メインプロセスが /bin/bash 等であるコンテナに対しては、メインプロセスに直接アタッチすることができます。この場合、exit や Ctrl-D 等でぬけると、メインプロセス(＝コンテナ)自体が終了してしまします。
+```shell:コンテナに接続する
+# コンテナのメインプロセスにアタッチする
+docker attach cont1
+[root@db80ea8860ff /]# Ctrl-P Ctrl-Q   デタッチするには Ctrl-P Ctrl-Q を押す
+```
+  
+- httpd イメージなど、メインプロセスが httpd 等のコンテナの場合、メインプロセスとは別に、もう一つ別の /bin/bash 等を起動して、それにアタッチすることも可能です。この場合、exit や Ctrl-D で抜けても /bin/bash が終了するのみで、メインプロセス(＝コンテナ)は終了しません。
+```shell:
+# コンテナにもうひとつ別の /bin/bash を起動して接続する
+docker exec -it cont1 /bin/bash
+[root@db80ea8860ff /]# exit
+```
+
+
+```shell:ホストのディレクトリをマウントする
+# SELinuxを無効化する
+vi /etc/selinux/config
+SELINUX=disabled
+
+```shell:ホストの8080ポートをコンテナの80にマッピングする
+docker run -d -it --name cont1 -p 8080:80 centos:centos6
+```
+
+
+# setenforce 0
+
+-vオプションでホストの /mnt/cont1 をコンテナの /mnt にマウントする
+# docker run -d -it --name cont1 -v /mnt/cont1:/mnt centos:centos6
+```
+
 ## dockerコマンド
 
 ```console
@@ -123,4 +204,19 @@ config - コンフィグを管理する
 context - ビルド時のコンテキストを管理する
 engine - Dockerエンジンを管理する
 plugin - プラグインを管理する
+```
+
+### オプション(OPTIONS)
+```console
+--config string
+-c, --context string
+-D, --debug
+-H, --host list
+-l, --log-level string
+-v, --version
+--tls
+--tlscacert string
+--tlscert string
+--tlskey string
+--tlsverify
 ```
